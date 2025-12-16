@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Переміщення об'єктів з гравітацією та інерцією</title>
+    <style>
+        .draggable {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            opacity: 0.7;
+            cursor: move;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        #obj1 {
+            background-color: rgba(231, 76, 60, 0.7);
+            top: 50px;
+            left: 50px;
+        }
+
+        #obj2 {
+            background-color: rgba(46, 204, 113, 0.7);
+            border-radius: 50%;
+            top: 50px;
+            left: 250px;
+        }
+
+        #obj3 {
+            width: 0;
+            height: 0;
+            background-color: transparent;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 104px solid rgba(243, 156, 18, 0.7);
+            top: 200px;
+            left: 150px;
+        }
+
+        #obj3 span {
+            position: absolute;
+            top: 60px;
+            left: -30px;
+            width: 120px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="obj1" class="draggable">Квадрат</div>
+    <div id="obj2" class="draggable">Коло</div>
+    <div id="obj3" class="draggable"><span>Трикутник</span></div>
+
+    <script>
+        const objects = document.querySelectorAll('.draggable');
+        const gravityBase = 0.5;
+        const friction = 0.95; // Коефіцієнт тертя (менше 1 — сильніше затухання)
+        let gravityScale = 1;
+
+        function updateGravityScale() {
+            const viewportHeight = window.innerHeight;
+            gravityScale = viewportHeight / 800;
+        }
+
+        updateGravityScale();
+        window.addEventListener('resize', updateGravityScale);
+
+        objects.forEach(element => {
+            let velocityX = 0;
+            let velocityY = 0;
+            let isDragging = false;
+            let lastMouseX = 0;
+            let lastMouseY = 0;
+
+            function makeDraggable(element) {
+                element.onmousedown = dragMouseDown;
+
+                function dragMouseDown(e) {
+                    e.preventDefault();
+                    isDragging = true;
+                    lastMouseX = e.clientX;
+                    lastMouseY = e.clientY;
+                    document.onmouseup = closeDragElement;
+                    document.onmousemove = elementDrag;
+                }
+
+                function elementDrag(e) {
+                    e.preventDefault();
+                    const deltaX = e.clientX - lastMouseX;
+                    const deltaY = e.clientY - lastMouseY;
+
+                    // Оновлюємо швидкість на основі переміщення миші
+                    velocityX = deltaX;
+                    velocityY = deltaY;
+
+                    let newTop = element.offsetTop + deltaY;
+                    let newLeft = element.offsetLeft + deltaX;
+
+                    element.style.top = newTop + "px";
+                    element.style.left = newLeft + "px";
+
+                    lastMouseX = e.clientX;
+                    lastMouseY = e.clientY;
+                }
+
+                function closeDragElement() {
+                    document.onmouseup = null;
+                    document.onmousemove = null;
+                    isDragging = false;
+                }
+            }
+
+            makeDraggable(element);
+
+            function physicsLoop() {
+                if (!isDragging) {
+                    // Гравітація
+                    velocityY += gravityBase * gravityScale;
+
+                    // Тертя (затухання інерції)
+                    velocityX *= friction;
+                    velocityY *= friction;
+
+                    let currentTop = parseFloat(element.style.top || element.offsetTop);
+                    let currentLeft = parseFloat(element.style.left || element.offsetLeft);
+
+                    let newTop = currentTop + velocityY;
+                    let newLeft = currentLeft + velocityX;
+
+                    const elementHeight = element.offsetHeight || 120;
+                    const elementWidth = element.offsetWidth || 120;
+                    const floor = window.innerHeight - elementHeight;
+
+                    // Обмеження по вертикалі (підлога)
+                    if (newTop > floor) {
+                        newTop = floor;
+                        velocityY = 0;
+                    }
+
+                    // Обмеження по горизонталі (опціонально, можна прибрати)
+                    if (newLeft < 0) {
+                        newLeft = 0;
+                        velocityX = 0;
+                    }
+                    if (newLeft > window.innerWidth - elementWidth) {
+                        newLeft = window.innerWidth - elementWidth;
+                        velocityX = 0;
+                    }
+
+                    element.style.top = newTop + "px";
+                    element.style.left = newLeft + "px";
+                }
+
+                requestAnimationFrame(physicsLoop);
+            }
+
+            physicsLoop();
+        });
+    </script>
+
+</body>
+</html>
