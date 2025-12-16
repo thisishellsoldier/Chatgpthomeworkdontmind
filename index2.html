@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Переміщення об'єктів різної форми</title>
+    <style>
+        .draggable {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            opacity: 0.7; /* Загальна напівпрозорість */
+            cursor: move;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* Квадрат */
+        #obj1 {
+            background-color: rgba(231, 76, 60, 0.7); /* Червоний напівпрозорий */
+            top: 50px;
+            left: 50px;
+        }
+
+        /* Коло */
+        #obj2 {
+            background-color: rgba(46, 204, 113, 0.7); /* Зелений напівпрозорий */
+            border-radius: 50%;
+            top: 50px;
+            left: 250px;
+        }
+
+        /* Трикутник */
+        #obj3 {
+            width: 0;
+            height: 0;
+            background-color: transparent;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 104px solid rgba(243, 156, 18, 0.7); /* Помаранчевий напівпрозорий */
+            top: 200px;
+            left: 150px;
+        }
+
+        #obj3 span {
+            position: absolute;
+            top: 60px;
+            left: -30px;
+            width: 120px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="obj1" class="draggable">Квадрат</div>
+    <div id="obj2" class="draggable">Коло</div>
+    <div id="obj3" class="draggable"><span>Трикутник</span></div>
+
+    <script>
+        function makeDraggable(element) {
+            let posX = 0, posY = 0, mouseX = 0, mouseY = 0;
+
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                posX = mouseX - e.clientX;
+                posY = mouseY - e.clientY;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                element.style.top = (element.offsetTop - posY) + "px";
+                element.style.left = (element.offsetLeft - posX) + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        document.querySelectorAll('.draggable').forEach(element => {
+            makeDraggable(element);
+        });
+    </script>
+
+</body>
+</html>
