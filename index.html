@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Переміщення об'єктів</title>
+    <style>
+        .draggable {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            border: 2px solid #2c3e50;
+            cursor: move;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #obj1 { background-color: #e74c3c; top: 50px; left: 50px; }
+        #obj2 { background-color: #2ecc71; top: 50px; left: 200px; }
+        #obj3 { background-color: #f39c12; top: 200px; left: 125px; }
+    </style>
+</head>
+<body>
+
+    <div id="obj1" class="draggable">Об'єкт 1</div>
+    <div id="obj2" class="draggable">Об'єкт 2</div>
+    <div id="obj3" class="draggable">Об'єкт 3</div>
+
+    <script>
+        // Функція для ініціалізації переміщення елемента
+        function makeDraggable(element) {
+            let posX = 0, posY = 0, mouseX = 0, mouseY = 0;
+
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // Отримуємо початкові координати миші
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e = e || window.event;
+                e.preventDefault();
+                // Обчислюємо нове положення миші
+                posX = mouseX - e.clientX;
+                posY = mouseY - e.clientY;
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                // Встановлюємо нове положення елемента
+                element.style.top = (element.offsetTop - posY) + "px";
+                element.style.left = (element.offsetLeft - posX) + "px";
+            }
+
+            function closeDragElement() {
+                // Припиняємо переміщення при відпусканні кнопки миші
+                document.onmouseup = null;
+                document.onmousemove = null;
+            }
+        }
+
+        // Застосовуємо функцію до всіх елементів із класом draggable
+        document.querySelectorAll('.draggable').forEach(element => {
+            makeDraggable(element);
+        });
+    </script>
+
+</body>
+</html>
